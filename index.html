@@ -144,22 +144,31 @@
             myName = document.getElementById('usernameInput').value.trim() || "שחקן";
             document.getElementById('startBtn').disabled = true;
             document.getElementById('waitingMsg').classList.remove('hidden');
-
-            socket = io(SERVER_URL);
-
+        
+            // הגדרה מפורשת של פרוטוקול החיבור כדי למנוע נפילה ל-localhost
+            socket = io(SERVER_URL, {
+                transports: ['websocket'],
+                upgrade: false
+            });
+        
             socket.emit('join-room', { roomCode, username: myName });
-
+        
             socket.on('init-role', (role) => {
                 myRole = role;
             });
-
+        
             socket.on('game-sync', (roomData) => {
                 if(roomData.gameState.started) {
                     renderGameUI(roomData);
                 }
             });
+        
+            // שלב בדיקה: הדפסת שגיאות לקונסול בזמן אמת במידה ויש
+            socket.on('connect_error', (error) => {
+                console.error("Socket connection failed:", error);
+            });
         }
-
+        
         function sendActionToServer(actionType, actionData) {
             socket.emit('game-action', { roomCode, actionType, data: actionData });
         }
