@@ -3,70 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מכירה פומבית - אונליין מלא</title>
-    <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
+    <title>מכירה פומבית - שרת פרטי</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         :root {
-            --bg-color: #1a1a2e;
-            --card-bg: #162447;
-            --accent-color: #00d2fc;
-            --text-color: #ffffff;
-            --muted-text: #b0b0b0;
-            --success-color: #4cd137;
-            --danger-color: #e84118;
+            --bg-color: #1a1a2e; --card-bg: #162447; --accent-color: #00d2fc;
+            --text-color: #ffffff; --muted-text: #b0b0b0; --success-color: #4cd137; --danger-color: #e84118;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         header { width: 100%; max-width: 900px; text-align: center; margin-bottom: 25px; }
-        h1 { color: var(--accent-color); margin-bottom: 5px; }
-
-        .btn { background-color: var(--accent-color); color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.3s; }
-        .btn:hover { background-color: #00f0ff; }
+        h1 { color: var(--accent-color); }
+        .btn { background-color: var(--accent-color); color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn:disabled { background-color: #555 !important; color: #aaa !important; cursor: not-allowed; }
-
         .container { width: 100%; max-width: 900px; }
         .panel { background-color: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); margin-bottom: 25px; }
-        h2 { margin-bottom: 15px; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 10px; font-size: 1.3rem; }
-        
-        .name-section {
-            margin-bottom: 25px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .name-input {
-            flex-grow: 1; max-width: 300px; background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1); padding: 10px 15px;
-            border-radius: 6px; color: white; font-size: 1rem; outline: none;
-        }
-
-        .share-link-section {
-            background: rgba(0, 210, 252, 0.05); border: 1px dashed var(--accent-color);
-            padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center;
-        }
-        .link-box { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 4px; font-family: monospace; font-size: 0.9rem; word-break: break-all; margin-bottom: 10px; }
-
+        .name-section { margin-bottom: 25px; background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; }
+        .name-input { flex-grow: 1; max-width: 300px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); padding: 10px 15px; border-radius: 6px; color: white; outline: none; }
+        .share-link-section { background: rgba(0, 210, 252, 0.05); border: 1px dashed var(--accent-color); padding: 15px; border-radius: 8px; margin-bottom: 25px; text-align: center; }
+        .link-box { background: rgba(0,0,0,0.4); padding: 8px; border-radius: 4px; font-family: monospace; margin-bottom: 10px; word-break: break-all; }
         .game-layout { display: flex; flex-direction: column; gap: 25px; width: 100%; }
         .arena { background: rgba(0,0,0,0.3); border-radius: 8px; padding: 25px; text-align: center; border: 1px dashed rgba(255,255,255,0.2); max-width: 600px; margin: 0 auto; width: 100%; }
         .turn-indicator { font-size: 1.3rem; font-weight: bold; color: #f1c40f; margin-bottom: 10px; background: rgba(241, 196, 15, 0.1); padding: 8px; border-radius: 6px; display: inline-block; }
         .lot-name { font-size: 2.2rem; color: #ffffff; font-weight: bold; }
         .lot-team { font-size: 1rem; color: var(--accent-color); margin-bottom: 15px; }
-        .timer { font-size: 2.5rem; color: var(--danger-color); font-weight: bold; }
-        
         .bid-slider-container { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin: 20px 0; }
         .slider-row { display: flex; align-items: center; gap: 15px; }
-        .range-slider { flex-grow: 1; accent-color: var(--accent-color); cursor: pointer; }
+        .range-slider { flex-grow: 1; accent-color: var(--accent-color); }
         .slider-val { font-size: 1.5rem; font-weight: bold; color: var(--success-color); min-width: 50px; }
-
         .action-btns { display: flex; gap: 15px; justify-content: center; }
         .btn-pass { background-color: var(--danger-color); color: white; }
         .btn-continue { background-color: var(--success-color); color: white; }
-
         .teams-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: rgba(0, 0, 0, 0.15); padding: 20px; border-radius: 12px; }
         .player-column { display: flex; flex-direction: column; }
         .player-title { font-size: 1.1rem; font-weight: bold; }
@@ -74,7 +41,6 @@
         .roster-table-list { list-style: none; }
         .roster-table-list li { font-size: 0.95rem; padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: var(--muted-text); }
         .slot-num { color: var(--accent-color); font-weight: bold; margin-left: 5px; }
-
         .summary-layout { text-align: center; background: var(--card-bg); border-radius: 16px; padding: 35px; border: 2px solid var(--accent-color); }
         .hidden { display: none !important; }
     </style>
@@ -86,7 +52,6 @@
     </header>
 
     <div class="container">
-
         <div class="panel" id="lobbyPanel">
             <div class="share-link-section">
                 <div style="font-weight: bold; margin-bottom: 8px; color: var(--accent-color);">🔗 שלח את הקישור לחבר:</div>
@@ -100,7 +65,7 @@
             </div>
 
             <div style="text-align: center;">
-                <button class="btn" id="startBtn" style="font-size: 1.2rem; padding: 12px 50px;" onclick="connectToGame()">🚀 התחבר למשחק</button>
+                <button class="btn" id="startBtn" style="font-size: 1.2rem; padding: 12px 50px;" onclick="connectToWebServer()">🚀 התחבר למשחק</button>
                 <div id="waitingMsg" class="hidden" style="color: #f1c40f; margin-top: 15px; font-weight: bold;">ממתין שהחבר יתחבר... ⏳</div>
             </div>
         </div>
@@ -110,7 +75,6 @@
                 <div class="turn-indicator" id="turnDisplay">מתחילים...</div>
                 <div class="lot-name" id="currentLot">-</div>
                 <div class="lot-team" id="currentLotTeam">-</div>
-                <div class="timer" id="timer">15</div>
                 
                 <div style="margin: 15px 0; font-size: 1.1rem;">
                     הצעה מובילה: <strong id="bidDisplay" style="color: var(--accent-color); font-size: 1.5rem;">$1</strong> 
@@ -127,8 +91,8 @@
                 </div>
                 
                 <div class="action-btns">
-                    <button class="btn" id="submitBidBtn" onclick="sendGameAction('bid', {amount: parseInt(document.getElementById('bidRange').value), sender: myRole})">אישור</button>
-                    <button class="btn btn-pass" id="passBtn" onclick="sendGameAction('pass', {sender: myRole})">ויתור</button>
+                    <button class="btn" id="submitBidBtn" onclick="sendActionToServer('bid', {amount: parseInt(document.getElementById('bidRange').value), sender: myRole})">אישור</button>
+                    <button class="btn btn-pass" id="passBtn" onclick="sendActionToServer('pass', {sender: myRole})">ויתור</button>
                 </div>
             </div>
 
@@ -150,16 +114,13 @@
             <h2>🏁 המשחק הסתיים!</h2>
             <button class="btn" onclick="location.reload()">משחק חדש</button>
         </div>
-
     </div>
 
     <script>
-        // === הגדרות PUSHER - חובה למלא את כל ה-4 ===
-        const PUSHER_APP_ID = "2174018";
-        const PUSHER_KEY = "53572d10e44949381b83";
-        const PUSHER_SECRET = "c4595958e6d42f807e79";
-        const PUSHER_CLUSTER = "eu";
-        // =============================================
+        // === כתובת השרת של RENDER ===
+        // כשאתה מריץ על המחשב: השאר localhost. כשתעלה ל-Render: החלף בקישור שהם יתנו לך.
+        const SERVER_URL = "http://localhost:3000"; 
+        // =============================
 
         const playersPool = [
             { name: "ערן זהבי", team: "מכבי תל אביב" }, { name: "מנור סולומון", team: "טוטנהאם" },
@@ -167,7 +128,8 @@
             { name: "ים מדר", team: "באיירן מינכן" }, { name: "קיליאן אמבפה", team: "ריאל מדריד" }
         ];
 
-        let myRole = null; 
+        let socket;
+        let myRole = null;
         let myName = "";
         const urlParams = new URLSearchParams(window.location.search);
         let roomCode = urlParams.get('room');
@@ -178,155 +140,68 @@
         }
         document.getElementById('gameUrlBox').innerText = window.location.href;
 
-        let pusher, channel;
-        let gameState = {
-            p1Name: "", p2Name: "", p1M: 20, p2M: 20, p1R: [], p2R: [],
-            currentBid: 1, leadingBidder: 'p1', currentTurn: 'p1', lotIndex: 0, isInitial: true
-        };
-
-        function connectToGame() {
+        function connectToWebServer() {
             myName = document.getElementById('usernameInput').value.trim() || "שחקן";
             document.getElementById('startBtn').disabled = true;
             document.getElementById('waitingMsg').classList.remove('hidden');
 
-            pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER });
-            channel = pusher.subscribe('room-' + roomCode);
+            socket = io(SERVER_URL);
 
-            // הקשבה לפקודות שמגיעות מה-API
-            channel.bind('game-update', function(data) {
-                handleIncomingState(data);
+            socket.emit('join-room', { roomCode, username: myName });
+
+            socket.on('init-role', (role) => {
+                myRole = role;
             });
 
-            // הודעה חיה לחבר שנכנסנו
-            setTimeout(() => {
-                triggerPusherAPI('join', { name: myName });
-            }, 800);
-        }
-
-        // פונקציית הקסם שעוקפת את הצורך בשרת ומשתמשת ב-Pusher ישירות
-        function triggerPusherAPI(type, payload) {
-            // אנחנו משתמשים בשירות חלופי חינמי לחלוטין שמעביר את ההודעה ללא חסימות אבטחה של קליינט
-            // הנתונים עוברים בצורה ישירה ומאובטחת
-            const dataPayload = { type: type, payload: payload, room: roomCode };
-            
-            // שימוש בצינור פומבי קל לטובת סנכרון מהיר
-            fetch(`https://kv-relay.vercel.app/api/relay`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    appId: PUSHER_APP_ID, key: PUSHER_KEY, secret: PUSHER_SECRET, cluster: PUSHER_CLUSTER,
-                    channel: 'room-' + roomCode, event: 'game-update', data: dataPayload
-                })
-            }).catch(e => console.log("Relay error:", e));
-        }
-
-        function handleIncomingState(data) {
-            if (data.room !== roomCode) return;
-
-            if (data.type === 'join') {
-                if (!myRole) {
-                    // מי שלחץ ראשון הוא P1
-                    myRole = 'p1';
-                    gameState.p1Name = myName;
-                    triggerPusherAPI('welcome', { p1Name: myName });
-                } else if (myRole === 'p1' && data.payload.name !== myName) {
-                    // P2 הצטרף, P1 מעדכן אותו ומתחילים
-                    gameState.p2Name = data.payload.name;
-                    triggerPusherAPI('sync', { state: gameState });
+            socket.on('game-sync', (roomData) => {
+                if(roomData.gameState.started) {
+                    renderGameUI(roomData);
                 }
-            }
-
-            if (data.type === 'welcome' && myRole !== 'p1') {
-                myRole = 'p2';
-                gameState.p1Name = data.payload.p1Name;
-                gameState.p2Name = myName;
-            }
-
-            if (data.type === 'sync') {
-                gameState = data.payload.state;
-                renderUI();
-            }
-
-            if (data.type === 'action') {
-                processGameAction(data.payload.actionType, data.payload.data);
-            }
+            });
         }
 
-        function sendGameAction(actionType, actionData) {
-            triggerPusherAPI('action', { actionType: actionType, data: actionData });
+        function sendActionToServer(actionType, actionData) {
+            socket.emit('game-action', { roomCode, actionType, data: actionData });
         }
 
-        function processGameAction(actionType, data) {
-            if (actionType === 'bid') {
-                gameState.currentBid = data.amount;
-                gameState.leadingBidder = data.sender;
-                gameState.isInitial = false;
-                gameState.currentTurn = data.sender === 'p1' ? 'p2' : 'p1';
-            } else if (actionType === 'pass') {
-                if (gameState.isInitial && gameState.currentTurn === gameState.leadingBidder) {
-                    gameState.isInitial = false;
-                    gameState.currentTurn = gameState.currentTurn === 'p1' ? 'p2' : 'p1';
-                } else {
-                    // קנייה!
-                    const winner = gameState.leadingBidder;
-                    const cost = gameState.currentBid;
-                    const item = playersPool[gameState.lotIndex % playersPool.length];
-                    const text = `${item.name} ($${cost})`;
-
-                    if (winner === 'p1') {
-                        gameState.p1M -= cost;
-                        gameState.p1R.push(text);
-                    } else {
-                        gameState.p2M -= cost;
-                        gameState.p2R.push(text);
-                    }
-
-                    gameState.lotIndex++;
-                    gameState.currentBid = 1;
-                    gameState.leadingBidder = gameState.lotIndex % 2 === 0 ? 'p1' : 'p2';
-                    gameState.currentTurn = gameState.leadingBidder;
-                    gameState.isInitial = true;
-                }
-            }
-            renderUI();
-        }
-
-        function renderUI() {
+        function renderGameUI(roomData) {
             document.getElementById('lobbyPanel').classList.add('hidden');
             document.getElementById('gamePanel').classList.remove('hidden');
 
-            document.getElementById('p1NameDisplay').innerText = gameState.p1Name || "שחקן 1";
-            document.getElementById('p2NameDisplay').innerText = gameState.p2Name || "שחקן 2";
-            document.getElementById('p1Money').innerText = `$${gameState.p1M}`;
-            document.getElementById('p2Money').innerText = `$${gameState.p2M}`;
+            const state = roomData.gameState;
+            
+            document.getElementById('p1NameDisplay').innerText = roomData.p1.name;
+            document.getElementById('p1Money').innerText = `$${roomData.p1.money}`;
+            document.getElementById('p2NameDisplay').innerText = roomData.p2.name;
+            document.getElementById('p2Money').innerText = `$${roomData.p2.money}`;
 
-            if (gameState.p1R.length >= 5 && gameState.p2R.length >= 5) {
+            if (roomData.p1.roster.length >= 5 && roomData.p2.roster.length >= 5) {
                 document.getElementById('gamePanel').classList.add('hidden');
                 document.getElementById('summaryPanel').classList.remove('hidden');
                 return;
             }
 
-            const currentLot = playersPool[gameState.lotIndex % playersPool.length];
+            const currentLot = playersPool[state.lotIndex % playersPool.length];
             document.getElementById('currentLot').innerText = currentLot.name;
             document.getElementById('currentLotTeam').innerText = currentLot.team;
 
-            document.getElementById('bidDisplay').innerText = `$${gameState.currentBid}`;
-            const leaderName = gameState.leadingBidder === 'p1' ? gameState.p1Name : gameState.p2Name;
+            document.getElementById('bidDisplay').innerText = `$${state.currentBid}`;
+            const leaderName = state.leadingBidder === 'p1' ? roomData.p1.name : roomData.p2.name;
             document.getElementById('bidder').innerText = `(מוביל: ${leaderName})`;
 
-            const activeName = gameState.currentTurn === 'p1' ? gameState.p1Name : gameState.p2Name;
+            const activeName = state.currentTurn === 'p1' ? roomData.p1.name : roomData.p2.name;
             document.getElementById('turnDisplay').innerText = `תור: ${activeName}`;
 
-            updateRosterList('p1Roster', gameState.p1R);
-            updateRosterList('p2Roster', gameState.p2R);
+            updateRosterList('p1Roster', roomData.p1.roster);
+            updateRosterList('p2Roster', roomData.p2.roster);
 
-            const isMyTurn = myRole === gameState.currentTurn;
+            const isMyTurn = myRole === state.currentTurn;
             document.getElementById('submitBidBtn').disabled = !isMyTurn;
             document.getElementById('passBtn').disabled = !isMyTurn;
             document.getElementById('bidRange').disabled = !isMyTurn;
 
             const passBtn = document.getElementById('passBtn');
-            if (gameState.isInitial && gameState.currentTurn === gameState.leadingBidder) {
+            if (state.isInitial && state.currentTurn === state.leadingBidder) {
                 passBtn.innerText = "המשך";
                 passBtn.className = "btn btn-continue";
             } else {
@@ -335,10 +210,9 @@
             }
 
             if (isMyTurn) {
-                const myMoney = myRole === 'p1' ? gameState.p1M : gameState.p2M;
-                const myCount = myRole === 'p1' ? gameState.p1R.length : gameState.p2R.length;
-                const maxBid = myMoney - (5 - myCount - 1);
-                const minBid = gameState.currentBid + 1;
+                const myData = myRole === 'p1' ? roomData.p1 : roomData.p2;
+                const maxBid = myData.money - (5 - myData.roster.length - 1);
+                const minBid = state.currentBid + 1;
 
                 const slider = document.getElementById('bidRange');
                 if (minBid > maxBid) {
